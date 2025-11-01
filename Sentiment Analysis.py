@@ -4,58 +4,41 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-
-"""IMPORT DATA"""
-data=pd.read_csv('movie_review.csv')
-#print(data.head())
-
-X=data.iloc[:,-2]
-Y=data.iloc[:,-1]
-
-""""TRAINING AND TESTING"""
-X_train,X_test,y_train,y_test=train_test_split(X,Y,test_size=0.20,random_state=1)
-
-""""FEATURE EXTRACTION"""
-""""Text to document matrix"""
-#from sklearn.feature_extraction.text import CountVectorizer
-#vectorizer=CountVectorizer()
-#corpus=['This is the first document',
-#        'This is the second document',
-#        'And the third one',
-#        'Is this the first document?']
-#X=vectorizer.fit_transform(corpus)
-#print(X)
-
-""""Tfidf"""
-#from sklearn.feature_extraction.text import TfidfVectorizer
-#vectorizer=TfidfVectorizer()
-#corpus=['This is the first document',
-#        'This is the second document',
-#       'And the third one',
-#       'Is this the first document?']
-#X=vectorizer.fit_transform(corpus)
-#print(vectorizer.get_feature_names_out())
-#print(X.toarray())
-
-from sklearn.svm import LinearSVC
-
-""""BUILDING TEXT CLASSIFIER WITH PIPELINE"""
 from sklearn.pipeline import Pipeline
-text_clf=Pipeline([
-    ('tfidf',TfidfVectorizer()),
-    ('clf',LinearSVC())
+import gradio as gr
+
+# --- Load and Prepare Data ---
+data = pd.read_csv('movie_review.csv')
+X = data.iloc[:, -2]
+Y = data.iloc[:, -1]
+
+# --- Train-Test Split ---
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.20, random_state=1)
+
+# --- Build and Train Model ---
+text_clf = Pipeline([
+    ('tfidf', TfidfVectorizer()),
+    ('clf', LinearSVC())
 ])
+text_clf.fit(X_train, y_train)
 
-text_clf.fit(X_train,y_train)
-y_pred=text_clf.predict(X_test)
-asc=accuracy_score(y_pred,y_test)
-#print(asc)
+# --- Evaluate ---
+y_pred = text_clf.predict(X_test)
+accuracy = accuracy_score(y_pred, y_test)
 
-st=input("Enter the statement")
-y_pred=text_clf.predict([st])
-print(y_pred)
+# --- Gradio Function ---
+def predict_sentiment(statement):
+    prediction = text_clf.predict([statement])[0]
+    return f"Predicted Sentiment: {prediction}"
 
+# --- Interface ---
+interface = gr.Interface(
+    fn=predict_sentiment,
+    inputs=gr.Textbox(lines=3, placeholder="Type a movie review..."),
+    outputs="text",
+    title="🎬 Sentiment Analysis App",
+    description=f"Predicts sentiment (positive/negative). Accuracy: {accuracy:.2f}"
+)
 
-
+if __name__ == "__main__":
+    interface.launch()
