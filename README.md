@@ -7,7 +7,7 @@ It predicts whether a given movie review is **positive** or **negative** using a
 
 ## 🚀 Live Demo
 
-👉 **Try the App here:** [Deployed Hugging Face Space Link](https://huggingface.co/spaces/Tjsj275/Sentiment_Analysis)  
+👉 **Try the App here:** [Deployed Link](https://huggingface.co/spaces/Tjsj275/Sentiment_Analysis)  
 
 ---
 
